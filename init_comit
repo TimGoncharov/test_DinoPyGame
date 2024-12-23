@@ -1,29 +1,83 @@
 import pygame
 
+# Init pygame
 pygame.init()
 
+#Setting params for window size
 display_width = 800
 display_height = 600
 
+#Setting window size
 display = pygame.display.set_mode((display_width, display_height))
+
+#Setting name of the window
 pygame.display.set_caption('Беги, лес, беги')
 
+#Setting icon for the window
 icon = pygame.image.load('icon.png')
 pygame.display.set_icon(icon)
 
+#Setting player's size in px
+user_width = 60
+user_height = 100
+
+#Setting where to initially display the player. Important: "Y" starts (=0) from the top of the window.
+#So to start counting from the bottom of the display, we should set Y for display_height.
+#Also, important that player starts to be drawn from the top, as Y starts on the top.
+#So we should subtract not only place where we imaging the ground (d_h - 100), but also player's height.
+user_x = display_width // 3
+user_y = display_height - user_height - 100
+
+#Don't really know how this function works, but it will help later to not update main cycle billion times per second.
+#See how it uses in the code below with clock.tick(60)
+clock = pygame.time.Clock()
+
+#Param to set that jump function exists and it sets to False on default
+make_jump = False
+#Sets initial value for jump. Aka how high player should jump to make the function stop
+jump_counter =  30
+
 def run_game():
+    #Making our make_jump param being seen by the main game function.
+    #It's hard to say why not state make_jump param right here initially, but maybe it makes some sense.
+    global make_jump
     game = True
 
+    #Every game is some kind of endless cycle, and it starts here
     while game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
 
+        #Parsing user's input. If SPACE get pressed so function do smth
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            make_jump = True
+
+        if make_jump:
+            jump()
+
+#Fiiling whole background of display to some color
         display.fill((255, 255, 255))
+
+#Drawing our player. Setting color of player and its size.
+        pygame.draw.rect(display, (247, 240, 22), (user_x, user_y, user_width, user_height))
+
+#Important to update display each while game cycle so it displays user's actions
         pygame.display.update()
 
+#Making cycle not to use all of CPU resources, aka cutting FPS
+        clock.tick(60)
+
+def jump():
+    global user_y, jump_counter, make_jump
+    if jump_counter >= -30:
+        user_y -= jump_counter / 2.5
+        jump_counter -= 1
+    else:
+        jump_counter = 30
+        make_jump = False
 
 run_game()
-
 
